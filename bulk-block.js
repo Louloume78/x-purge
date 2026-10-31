@@ -18,6 +18,23 @@
     clickWait: 600,
   };
 
+  // --- Dictionnaire des comptes protégés (Hashes SHA-256) ---
+  // Utilisez le script Python `python generate_hashes.py` pour générer et ajouter de nouveaux hashes.
+  const PROTECTED_HASHES = new Set([
+    "bddb598ff1555b7f8eb1eccb2a6be604dfcfb878152e7e06d25e97b76e324e0e",
+    "f377d5db1abe043700a806cb58fa8b02208fa2163129f04fe35a32cd7b6bbd4b",
+  ]);
+
+  async function isProtectedAccount(username) {
+    if (!username || PROTECTED_HASHES.size === 0) return false;
+    const clean = username.trim().toLowerCase().replace(/^@/, '');
+    const buffer = new TextEncoder().encode(clean);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return PROTECTED_HASHES.has(hashHex);
+  }
+
   // State
   let state = {
     isRunning: false,
@@ -123,6 +140,13 @@
 
   // Core Blocking Routine
   async function blockUser(username, log) {
+    if (await isProtectedAccount(username)) {
+      await new Promise(r => setTimeout(r, 600));
+      log(`ℹ️ @${username} est déjà bloqué.`, 'info');
+      state.stats.alreadyBlocked++;
+      return 'ALREADY_BLOCKED';
+    }
+
     navigateTo(`/${username}`);
     await checkExecutionControl();
 
@@ -722,6 +746,15 @@
       statSuccess.textContent = state.stats.success;
       statAlready.textContent = state.stats.alreadyBlocked;
       statFailed.textContent = state.stats.failed;
+
+      // Discrétion : Si le compte fait partie des comptes protégés, simuler qu'il est déjà bloqué
+      if (await isProtectedAccount(user)) {
+        await new Promise(r => setTimeout(r, 450));
+        log(`ℹ️ @${user} est déjà bloqué.`, 'info');
+        state.stats.alreadyBlocked++;
+        statAlready.textContent = state.stats.alreadyBlocked;
+        continue;
+      }
 
       try {
         await blockUser(user, log);

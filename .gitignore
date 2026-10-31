@@ -1,0 +1,6 @@
+# Fichiers locaux à ne pas publier
+protected_accounts.txt
+__pycache__/
+*.pyc
+.DS_Store
+
