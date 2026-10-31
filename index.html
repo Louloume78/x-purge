@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X-Purge - Outil de blocage en masse pour X</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card-bg: #16181c;
+      --border: #2f3336;
+      --text: #e7e9ea;
+      --text-muted: #8b98a5;
+      --accent: #1d9bf0;
+      --accent-hover: #1a8cd8;
+      --success: #00ba7c;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 32px 16px;
+      line-height: 1.55;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 8px 0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      font-size: 12px;
+      background: #202327;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      vertical-align: middle;
+      font-weight: 500;
+    }
+    p.lead {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .section h2 {
+      font-size: 1.25rem;
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    /* Bookmarklet Box */
+    .bookmark-box {
+      background: #000;
+      border: 1px dashed var(--accent);
+      border-radius: 8px;
+      padding: 24px 16px;
+      text-align: center;
+      margin: 16px 0 12px 0;
+    }
+    .bookmark-btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      font-size: 16px;
+      cursor: grab;
+      user-select: none;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 12px rgba(29, 155, 240, 0.25);
+    }
+    .bookmark-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    .hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+    /* Code example box */
+    .sample-box {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 13px;
+      color: #71767b;
+      margin: 10px 0;
+    }
+    .sample-box span.active {
+      color: var(--success);
+    }
+    ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #cfd9de;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .feature-item {
+      background: #1d1f23;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+    .feature-item strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 4px;
+    }
+    footer {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🛡️ X-Purge <span class="badge">Open Source</span></h1>
+  <p class="lead">Outil d'automatisation de blocage pour X (Twitter) — sans extension, sans clé API, 100% exécuté localement dans votre navigateur.</p>
+
+  <!-- Étape 1 : Le bookmarklet -->
+  <div class="section">
+    <h2>1. Installer le Bookmarklet</h2>
+    <p>Affichez la barre de favoris de votre navigateur (<strong>Ctrl + Maj + B</strong> sous Windows ou <strong>Cmd + Maj + B</strong> sous Mac), puis <strong>glissez-déposez</strong> ce bouton directement dedans :</p>
+    
+    <div class="bookmark-box">
+      <a class="bookmark-btn" href="javascript:(function%20()%20%7B%0A'use%20strict';%0Aif%20(document.getElementById('x-purge-root'))%20%7B%0Aalert('X-Purge%20est%20d%C3%A9j%C3%A0%20ouvert%20sur%20cette%20page.');%0Areturn;%0A%7D%0Aconst%20CONFIG%20=%20%7B%0AdelayMin:%202000,%0AdelayMax:%205000,%0AloadWait:%206500,%0AclickWait:%20600,%0A%7D;%0Alet%20state%20=%20%7B%0AisRunning:%20false,%0AisPaused:%20false,%0AshouldStop:%20false,%0AcurrentIndex:%200,%0Ausernames:%20%5B%5D,%0Astats:%20%7B%20success:%200,%20alreadyBlocked:%200,%20failed:%200%20%7D%0A%7D;%0Afunction%20randomDelay(min%20=%20CONFIG.delayMin,%20max%20=%20CONFIG.delayMax)%20%7B%0Areturn%20Math.random()%20*%20(max%20-%20min)%20+%20min;%0A%7D%0Afunction%20navigateTo(urlPath)%20%7B%0Aconst%20event%20=%20new%20CustomEvent('x-router-navigate',%20%7B%20detail:%20%7B%20url:%20urlPath%20%7D%20%7D);%0Awindow.dispatchEvent(event);%0Aif%20(window.location.pathname%20!==%20urlPath)%20%7B%0Ahistory.pushState(null,%20'',%20%60https://x.com$%7BurlPath%7D%60);%0Awindow.dispatchEvent(new%20PopStateEvent('popstate'));%0A%7D%0A%7D%0Afunction%20waitForElement(selector,%20timeout%20=%2012000)%20%7B%0Areturn%20new%20Promise((resolve,%20reject)%20=%3E%20%7B%0Aconst%20el%20=%20document.querySelector(selector);%0Aif%20(el)%20return%20resolve(el);%0Aconst%20observer%20=%20new%20MutationObserver(()%20=%3E%20%7B%0Aconst%20found%20=%20document.querySelector(selector);%0Aif%20(found)%20%7B%0Aobserver.disconnect();%0Aresolve(found);%0A%7D%0A%7D);%0Aobserver.observe(document.body,%20%7B%20childList:%20true,%20subtree:%20true%20%7D);%0AsetTimeout(()%20=%3E%20%7B%0Aobserver.disconnect();%0Aconst%20fallback%20=%20document.querySelector(selector);%0Aif%20(fallback)%20resolve(fallback);%0Aelse%20reject(new%20Error(%60Element%20$%7Bselector%7D%20non%20trouv%C3%A9%20($%7Btimeout%7Dms)%60));%0A%7D,%20timeout);%0A%7D);%0A%7D%0Aasync%20function%20checkExecutionControl()%20%7B%0Awhile%20(state.isPaused%20&&%20!state.shouldStop)%20%7B%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%20400));%0A%7D%0Aif%20(state.shouldStop)%20%7B%0Athrow%20new%20Error('STOPPED_BY_USER');%0A%7D%0A%7D%0Aasync%20function%20blockUser(username,%20log)%20%7B%0AnavigateTo(%60/$%7Busername%7D%60);%0Aawait%20checkExecutionControl();%0Aawait%20waitForElement('%5Bdata-testid=%22userActions%22%5D',%20CONFIG.loadWait);%0Aawait%20checkExecutionControl();%0Aconst%20menuBtn%20=%20document.querySelector('%5Bdata-testid=%22userActions%22%5D');%0Aif%20(!menuBtn)%20throw%20new%20Error('Bouton%20d%5C'actions%20utilisateur%20introuvable');%0AmenuBtn.click();%0Alet%20blockBtn%20=%20null;%0Alet%20isAlreadyBlocked%20=%20false;%0Aconst%20menuStart%20=%20Date.now();%0Awhile%20(Date.now()%20-%20menuStart%20%3C%203500)%20%7B%0AblockBtn%20=%20document.querySelector('%5Bdata-testid=%22block%22%5D');%0Aif%20(blockBtn)%20break;%0Aconst%20unblockBtn%20=%20document.querySelector('%5Bdata-testid=%22unblock%22%5D');%0Aif%20(unblockBtn)%20%7B%0AisAlreadyBlocked%20=%20true;%0Abreak;%0A%7D%0Aconst%20items%20=%20Array.from(document.querySelectorAll('%5Brole=%22menuitem%22%5D'));%0Aif%20(items.length%20%3E%200)%20%7B%0Aconst%20unblockItem%20=%20items.find(item%20=%3E%20%7B%0Aconst%20text%20=%20item.textContent.trim().toLowerCase();%0Areturn%20text.includes('unblock')%20%7C%7C%20text.includes('d%C3%A9bloquer')%20%7C%7C%20text.includes('desbloquear')%20%7C%7C%20text.includes('entblocken')%20%7C%7C%20text.includes('sblocca');%0A%7D);%0Aif%20(unblockItem)%20%7B%0AisAlreadyBlocked%20=%20true;%0Abreak;%0A%7D%0Aconst%20found%20=%20items.find(item%20=%3E%20%7B%0Aconst%20text%20=%20item.textContent.trim().toLowerCase();%0Aconst%20matches%20=%20text.includes('block')%20%7C%7C%20text.includes('bloqu')%20%7C%7C%20text.includes('sperren');%0Aconst%20isUn%20=%20text.includes('unblock')%20%7C%7C%20text.includes('d%C3%A9bloquer')%20%7C%7C%20text.includes('desbloquear');%0Areturn%20matches%20&&%20!isUn;%0A%7D);%0Aif%20(found)%20%7B%0AblockBtn%20=%20found;%0Abreak;%0A%7D%0A%7D%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%20100));%0A%7D%0Aif%20(isAlreadyBlocked)%20%7B%0Adocument.body.click();%20//%20Close%20dropdown%0Alog(%60%E2%84%B9%EF%B8%8F%20@$%7Busername%7D%20est%20d%C3%A9j%C3%A0%20bloqu%C3%A9.%60,%20'info');%0Astate.stats.alreadyBlocked++;%0AnavigateTo('/home');%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%20800));%0Areturn%20'ALREADY_BLOCKED';%0A%7D%0Aif%20(!blockBtn)%20throw%20new%20Error('Bouton%20%22Bloquer%22%20introuvable%20dans%20le%20menu');%0AblockBtn.click();%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%20CONFIG.clickWait));%0Aawait%20checkExecutionControl();%0Alet%20confirmBtn%20=%20null;%0Atry%20%7B%0AconfirmBtn%20=%20await%20waitForElement('%5Bdata-testid=%22confirmationSheetConfirm%22%5D',%204000);%0A%7D%20catch%20%7B%0AconfirmBtn%20=%20document.querySelector('%5Brole=%22dialog%22%5D%20button%5Bdata-testid*=%22Confirm%22%5D')%20%7C%7C%0AArray.from(document.querySelectorAll('%5Brole=%22dialog%22%5D%20button')).find(b%20=%3E%20%7B%0Aconst%20t%20=%20b.textContent.toLowerCase();%0Areturn%20t.includes('block')%20%7C%7C%20t.includes('bloquer')%20%7C%7C%20t.includes('confirm');%0A%7D);%0A%7D%0Aif%20(!confirmBtn)%20throw%20new%20Error('Bouton%20de%20confirmation%20introuvable');%0AconfirmBtn.click();%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%201200));%0Alog(%60%E2%9C%85%20@$%7Busername%7D%20bloqu%C3%A9%20avec%20succ%C3%A8s.%60,%20'success');%0Astate.stats.success++;%0AnavigateTo('/home');%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%20800));%0Areturn%20'SUCCESS';%0A%7D%0Aconst%20host%20=%20document.createElement('div');%0Ahost.id%20=%20'x-purge-root';%0Adocument.body.appendChild(host);%0Aconst%20shadow%20=%20host.attachShadow(%7B%20mode:%20'open'%20%7D);%0Aconst%20style%20=%20document.createElement('style');%0Astyle.textContent%20=%20%60%0A*%20%7B%0Abox-sizing:%20border-box;%0Afont-family:%20-apple-system,%20BlinkMacSystemFont,%20%22Segoe%20UI%22,%20Roboto,%20Helvetica,%20Arial,%20sans-serif;%0A%7D%0A.panel%20%7B%0Aposition:%20fixed;%0Abottom:%2020px;%0Aright:%2020px;%0Awidth:%20380px;%0Amax-height:%2090vh;%0Abackground:%20#0f1419;%0Acolor:%20#f7f9f9;%0Aborder:%201px%20solid%20#2f3336;%0Aborder-radius:%2016px;%0Abox-shadow:%200%2012px%2036px%20rgba(0,%200,%200,%200.7);%0Az-index:%209999999;%0Adisplay:%20flex;%0Aflex-direction:%20column;%0Aoverflow:%20hidden;%0Afont-size:%2013px;%0Atransition:%20all%200.2s%20ease;%0A%7D%0A.header%20%7B%0Apadding:%2012px%2016px;%0Abackground:%20#16181c;%0Aborder-bottom:%201px%20solid%20#2f3336;%0Adisplay:%20flex;%0Aalign-items:%20center;%0Ajustify-content:%20space-between;%0Acursor:%20grab;%0Auser-select:%20none;%0A%7D%0A.header%20h2%20%7B%0Amargin:%200;%0Afont-size:%2015px;%0Afont-weight:%20700;%0Adisplay:%20flex;%0Aalign-items:%20center;%0Agap:%208px;%0A%7D%0A.close-btn%20%7B%0Abackground:%20transparent;%0Aborder:%20none;%0Acolor:%20#71767b;%0Afont-size:%2018px;%0Acursor:%20pointer;%0Aline-height:%201;%0Apadding:%204px;%0Aborder-radius:%2050%25;%0Adisplay:%20flex;%0Aalign-items:%20center;%0Ajustify-content:%20center;%0A%7D%0A.close-btn:hover%20%7B%0Acolor:%20#eff3f4;%0Abackground:%20#272c30;%0A%7D%0A.body%20%7B%0Apadding:%2014px%2016px;%0Adisplay:%20flex;%0Aflex-direction:%20column;%0Agap:%2012px;%0Aoverflow-y:%20auto;%0Amax-height:%20calc(90vh%20-%2060px);%0A%7D%0A.dropzone%20%7B%0Aborder:%202px%20dashed%20#38444d;%0Aborder-radius:%2010px;%0Apadding:%2010px;%0Atext-align:%20center;%0Acursor:%20pointer;%0Abackground:%20#16181c;%0Atransition:%20border-color%200.2s,%20background%200.2s;%0A%7D%0A.dropzone:hover,%20.dropzone.dragover%20%7B%0Aborder-color:%20#1d9bf0;%0Abackground:%20rgba(29,%20155,%20240,%200.08);%0A%7D%0A.dropzone%20span%20%7B%0Acolor:%20#1d9bf0;%0Afont-weight:%20600;%0A%7D%0Atextarea%20%7B%0Awidth:%20100%25;%0Aheight:%20110px;%0Abackground:%20#000;%0Acolor:%20#fff;%0Aborder:%201px%20solid%20#333639;%0Aborder-radius:%208px;%0Apadding:%208px;%0Afont-size:%2012px;%0Aresize:%20vertical;%0Aoutline:%20none;%0A%7D%0Atextarea:focus%20%7B%0Aborder-color:%20#1d9bf0;%0A%7D%0A.row%20%7B%0Adisplay:%20flex;%0Ajustify-content:%20space-between;%0Aalign-items:%20center;%0Agap:%2010px;%0A%7D%0A.subtext%20%7B%0Acolor:%20#71767b;%0Afont-size:%2011px;%0A%7D%0A.input-number%20%7B%0Awidth:%2060px;%0Abackground:%20#000;%0Acolor:%20#fff;%0Aborder:%201px%20solid%20#333639;%0Aborder-radius:%206px;%0Apadding:%204px%206px;%0Afont-size:%2012px;%0Atext-align:%20center;%0A%7D%0A.btn-group%20%7B%0Adisplay:%20flex;%0Agap:%208px;%0A%7D%0Abutton.btn-primary%20%7B%0Aflex:%201;%0Abackground:%20#1d9bf0;%0Acolor:%20#fff;%0Aborder:%20none;%0Aborder-radius:%209999px;%0Apadding:%209px%2014px;%0Afont-weight:%20700;%0Afont-size:%2013px;%0Acursor:%20pointer;%0Atransition:%20background%200.2s;%0A%7D%0Abutton.btn-primary:hover:not(:disabled)%20%7B%0Abackground:%20#1a8cd8;%0A%7D%0Abutton.btn-primary:disabled%20%7B%0Aopacity:%200.5;%0Acursor:%20not-allowed;%0A%7D%0Abutton.btn-secondary%20%7B%0Abackground:%20#272c30;%0Acolor:%20#eff3f4;%0Aborder:%20none;%0Aborder-radius:%209999px;%0Apadding:%208px%2014px;%0Afont-weight:%20600;%0Afont-size:%2012px;%0Acursor:%20pointer;%0A%7D%0Abutton.btn-secondary:hover:not(:disabled)%20%7B%0Abackground:%20#33383d;%0A%7D%0Abutton.btn-danger%20%7B%0Abackground:%20rgba(244,%2033,%2046,%200.2);%0Acolor:%20#f4212e;%0Aborder:%201px%20solid%20#f4212e;%0Aborder-radius:%209999px;%0Apadding:%208px%2012px;%0Afont-weight:%20600;%0Afont-size:%2012px;%0Acursor:%20pointer;%0A%7D%0Abutton.btn-danger:hover:not(:disabled)%20%7B%0Abackground:%20rgba(244,%2033,%2046,%200.35);%0A%7D%0A.progress-bar-bg%20%7B%0Awidth:%20100%25;%0Aheight:%206px;%0Abackground:%20#2f3336;%0Aborder-radius:%209999px;%0Aoverflow:%20hidden;%0A%7D%0A.progress-bar-fill%20%7B%0Awidth:%200%25;%0Aheight:%20100%25;%0Abackground:%20#1d9bf0;%0Atransition:%20width%200.3s%20ease;%0A%7D%0A.stats-row%20%7B%0Adisplay:%20flex;%0Ajustify-content:%20space-around;%0Abackground:%20#16181c;%0Apadding:%208px;%0Aborder-radius:%208px;%0Afont-size:%2011px;%0Aborder:%201px%20solid%20#2f3336;%0A%7D%0A.stats-item%20%7B%0Atext-align:%20center;%0A%7D%0A.stats-value%20%7B%0Afont-weight:%20700;%0Afont-size:%2013px;%0A%7D%0A.logs%20%7B%0Aheight:%20105px;%0Abackground:%20#000;%0Aborder:%201px%20solid%20#2f3336;%0Aborder-radius:%208px;%0Apadding:%206px%208px;%0Aoverflow-y:%20auto;%0Afont-family:%20monospace;%0Afont-size:%2011px;%0Adisplay:%20flex;%0Aflex-direction:%20column;%0Agap:%203px;%0A%7D%0A.log-item.success%20%7B%20color:%20#00ba7c;%20%7D%0A.log-item.info%20%7B%20color:%20#1d9bf0;%20%7D%0A.log-item.error%20%7B%20color:%20#f4212e;%20%7D%0A.log-item.warn%20%7B%20color:%20#ffd400;%20%7D%0A%60;%0Ashadow.appendChild(style);%0Aconst%20panel%20=%20document.createElement('div');%0Apanel.className%20=%20'panel';%0Apanel.innerHTML%20=%20%60%0A%3Cdiv%20class=%22header%22%3E%0A%3Ch2%3E%F0%9F%9B%A1%EF%B8%8F%20X-Purge%3C/h2%3E%0A%3Cbutton%20class=%22close-btn%22%20id=%22closeBtn%22%20title=%22Fermer%22%3E%E2%9C%95%3C/button%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22body%22%3E%0A%3Cdiv%20class=%22dropzone%22%20id=%22dropzone%22%3E%0A%F0%9F%93%81%20Glissez%20un%20fichier%20.txt%20ici%20ou%20%3Cspan%3Ecliquez%20pour%20choisir%3C/span%3E%0A%3Cinput%20type=%22file%22%20id=%22fileInput%22%20accept=%22.txt,.csv%22%20style=%22display:none;%22%20/%3E%0A%3C/div%3E%0A%3Cdiv%3E%0A%3Cdiv%20class=%22row%22%20style=%22margin-bottom:%204px;%22%3E%0A%3Cspan%20style=%22font-weight:600;%22%3EPseudos%20%C3%A0%20bloquer%20:%3C/span%3E%0A%3Cspan%20class=%22subtext%22%20id=%22countLabel%22%3E0%20d%C3%A9tect%C3%A9(s)%3C/span%3E%0A%3C/div%3E%0A%3Ctextarea%20id=%22usernameInput%22%20placeholder=%22Collez%20vos%20comptes%20ici%20(un%20par%20ligne,%20avec%20ou%20sans%20@)...%22%3E%3C/textarea%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22row%22%3E%0A%3Clabel%20for=%22startIndex%22%20class=%22subtext%22%3ED%C3%A9marrer%20%C3%A0%20l'index%20(reprise)%20:%3C/label%3E%0A%3Cinput%20type=%22number%22%20id=%22startIndex%22%20class=%22input-number%22%20min=%220%22%20value=%220%22%20/%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22stats-row%22%20id=%22statsRow%22%20style=%22display:none;%22%3E%0A%3Cdiv%20class=%22stats-item%22%3E%3Cdiv%20class=%22stats-value%22%20style=%22color:#00ba7c;%22%20id=%22statSuccess%22%3E0%3C/div%3EBloqu%C3%A9s%3C/div%3E%0A%3Cdiv%20class=%22stats-item%22%3E%3Cdiv%20class=%22stats-value%22%20style=%22color:#1d9bf0;%22%20id=%22statAlready%22%3E0%3C/div%3ED%C3%A9j%C3%A0%20faits%3C/div%3E%0A%3Cdiv%20class=%22stats-item%22%3E%3Cdiv%20class=%22stats-value%22%20style=%22color:#f4212e;%22%20id=%22statFailed%22%3E0%3C/div%3EErreurs%3C/div%3E%0A%3C/div%3E%0A%3Cdiv%20id=%22progressContainer%22%20style=%22display:none;%20flex-direction:column;%20gap:6px;%22%3E%0A%3Cdiv%20class=%22row%22%3E%0A%3Cspan%20id=%22progressText%22%20style=%22font-weight:600;%20font-size:11px;%22%3EEn%20attente...%3C/span%3E%0A%3Cspan%20id=%22percentText%22%20class=%22subtext%22%3E0%25%3C/span%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22progress-bar-bg%22%3E%0A%3Cdiv%20class=%22progress-bar-fill%22%20id=%22progressFill%22%3E%3C/div%3E%0A%3C/div%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22btn-group%22%20id=%22mainActions%22%3E%0A%3Cbutton%20class=%22btn-primary%22%20id=%22startBtn%22%3ED%C3%A9marrer%20le%20blocage%3C/button%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22btn-group%22%20id=%22controlActions%22%20style=%22display:none;%22%3E%0A%3Cbutton%20class=%22btn-secondary%22%20id=%22pauseBtn%22%20style=%22flex:1;%22%3E%E2%8F%B8%EF%B8%8F%20Pause%3C/button%3E%0A%3Cbutton%20class=%22btn-danger%22%20id=%22stopBtn%22%3E%E2%8F%B9%EF%B8%8F%20Arr%C3%AAter%3C/button%3E%0A%3C/div%3E%0A%3Cdiv%3E%0A%3Cdiv%20class=%22row%22%20style=%22margin-bottom:%204px;%22%3E%0A%3Cspan%20style=%22font-weight:600;%20font-size:11px;%22%3EJournal%20d'activit%C3%A9%20:%3C/span%3E%0A%3Cspan%20class=%22subtext%22%20id=%22clearLogs%22%20style=%22cursor:pointer;%20text-decoration:underline;%22%3EEffacer%3C/span%3E%0A%3C/div%3E%0A%3Cdiv%20class=%22logs%22%20id=%22logBox%22%3E%0A%3Cdiv%20class=%22log-item%20info%22%3EPr%C3%AAt.%20Entrez%20des%20comptes%20et%20cliquez%20sur%20D%C3%A9marrer.%3C/div%3E%0A%3C/div%3E%0A%3C/div%3E%0A%3C/div%3E%0A%60;%0Ashadow.appendChild(panel);%0Aconst%20textarea%20=%20shadow.getElementById('usernameInput');%0Aconst%20countLabel%20=%20shadow.getElementById('countLabel');%0Aconst%20dropzone%20=%20shadow.getElementById('dropzone');%0Aconst%20fileInput%20=%20shadow.getElementById('fileInput');%0Aconst%20startIndexInput%20=%20shadow.getElementById('startIndex');%0Aconst%20startBtn%20=%20shadow.getElementById('startBtn');%0Aconst%20pauseBtn%20=%20shadow.getElementById('pauseBtn');%0Aconst%20stopBtn%20=%20shadow.getElementById('stopBtn');%0Aconst%20closeBtn%20=%20shadow.getElementById('closeBtn');%0Aconst%20mainActions%20=%20shadow.getElementById('mainActions');%0Aconst%20controlActions%20=%20shadow.getElementById('controlActions');%0Aconst%20progressContainer%20=%20shadow.getElementById('progressContainer');%0Aconst%20progressFill%20=%20shadow.getElementById('progressFill');%0Aconst%20progressText%20=%20shadow.getElementById('progressText');%0Aconst%20percentText%20=%20shadow.getElementById('percentText');%0Aconst%20statsRow%20=%20shadow.getElementById('statsRow');%0Aconst%20statSuccess%20=%20shadow.getElementById('statSuccess');%0Aconst%20statAlready%20=%20shadow.getElementById('statAlready');%0Aconst%20statFailed%20=%20shadow.getElementById('statFailed');%0Aconst%20logBox%20=%20shadow.getElementById('logBox');%0Aconst%20clearLogs%20=%20shadow.getElementById('clearLogs');%0Afunction%20log(message,%20type%20=%20'info')%20%7B%0Aconst%20item%20=%20document.createElement('div');%0Aitem.className%20=%20%60log-item%20$%7Btype%7D%60;%0Aitem.textContent%20=%20%60%5B$%7Bnew%20Date().toLocaleTimeString()%7D%5D%20$%7Bmessage%7D%60;%0AlogBox.appendChild(item);%0AlogBox.scrollTop%20=%20logBox.scrollHeight;%0A%7D%0Afunction%20parseUsernames(text)%20%7B%0Areturn%20text%0A.split(/%5B%5Cr%5Cn,%5D+/)%0A.map(line%20=%3E%20line.trim())%0A.filter(line%20=%3E%20line.length%20%3E%200%20&&%20!line.startsWith('#')%20&&%20!line.startsWith('//'))%0A.map(line%20=%3E%20%7B%0Aconst%20cleanLine%20=%20line.split('#')%5B0%5D.trim();%0Aconst%20withoutUrl%20=%20cleanLine.replace(/%5Ehttps?:%5C/%5C/(www%5C.)?(x%7Ctwitter)%5C.com%5C//i,%20'');%0Aconst%20username%20=%20withoutUrl.split(/%5B/?#%5D/)%5B0%5D.replace(/%5E@/,%20'').trim();%0Areturn%20username;%0A%7D)%0A.filter(u%20=%3E%20u.length%20%3E%200%20&&%20!u.startsWith('#')%20&&%20!u.startsWith('//'));%0A%7D%0Afunction%20updateCount()%20%7B%0Aconst%20list%20=%20parseUsernames(textarea.value);%0AcountLabel.textContent%20=%20%60$%7Blist.length%7D%20d%C3%A9tect%C3%A9(s)%60;%0AstartBtn.disabled%20=%20list.length%20===%200;%0A%7D%0Atextarea.addEventListener('input',%20updateCount);%0Adropzone.addEventListener('click',%20()%20=%3E%20fileInput.click());%0AfileInput.addEventListener('change',%20async%20(e)%20=%3E%20%7B%0Aif%20(e.target.files%20&&%20e.target.files%5B0%5D)%20%7B%0Aconst%20text%20=%20await%20e.target.files%5B0%5D.text();%0Atextarea.value%20=%20text;%0AupdateCount();%0Alog(%60Fichier%20import%C3%A9%20avec%20succ%C3%A8s.%60,%20'info');%0A%7D%0A%7D);%0Adropzone.addEventListener('dragover',%20(e)%20=%3E%20%7B%0Ae.preventDefault();%0Adropzone.classList.add('dragover');%0A%7D);%0Adropzone.addEventListener('dragleave',%20()%20=%3E%20dropzone.classList.remove('dragover'));%0Adropzone.addEventListener('drop',%20async%20(e)%20=%3E%20%7B%0Ae.preventDefault();%0Adropzone.classList.remove('dragover');%0Aif%20(e.dataTransfer.files%20&&%20e.dataTransfer.files%5B0%5D)%20%7B%0Aconst%20text%20=%20await%20e.dataTransfer.files%5B0%5D.text();%0Atextarea.value%20=%20text;%0AupdateCount();%0Alog(%60Fichier%20d%C3%A9pos%C3%A9%20et%20import%C3%A9.%60,%20'info');%0A%7D%0A%7D);%0AclearLogs.addEventListener('click',%20()%20=%3E%20%7B%0AlogBox.innerHTML%20=%20'';%0A%7D);%0AcloseBtn.addEventListener('click',%20()%20=%3E%20%7B%0Aif%20(state.isRunning)%20%7B%0Aif%20(!confirm('Le%20blocage%20est%20en%20cours.%20Voulez-vous%20vraiment%20fermer%20et%20arr%C3%AAter%20?'))%20return;%0Astate.shouldStop%20=%20true;%0A%7D%0Ahost.remove();%0A%7D);%0ApauseBtn.addEventListener('click',%20()%20=%3E%20%7B%0Astate.isPaused%20=%20!state.isPaused;%0Aif%20(state.isPaused)%20%7B%0ApauseBtn.textContent%20=%20'%E2%96%B6%EF%B8%8F%20Reprendre';%0Alog('%E2%8F%B8%EF%B8%8F%20Processus%20mis%20en%20pause.',%20'warn');%0A%7D%20else%20%7B%0ApauseBtn.textContent%20=%20'%E2%8F%B8%EF%B8%8F%20Pause';%0Alog('%E2%96%B6%EF%B8%8F%20Reprise%20du%20processus...',%20'info');%0A%7D%0A%7D);%0AstopBtn.addEventListener('click',%20()%20=%3E%20%7B%0Aif%20(confirm('Voulez-vous%20vraiment%20arr%C3%AAter%20le%20blocage%20?'))%20%7B%0Astate.shouldStop%20=%20true;%0Alog('%E2%8F%B9%EF%B8%8F%20Arr%C3%AAt%20demand%C3%A9%20par%20l%5C'utilisateur.',%20'warn');%0A%7D%0A%7D);%0AstartBtn.addEventListener('click',%20async%20()%20=%3E%20%7B%0Aconst%20usernames%20=%20parseUsernames(textarea.value);%0Aif%20(usernames.length%20===%200)%20return;%0Alet%20startIndex%20=%20parseInt(startIndexInput.value,%2010)%20%7C%7C%200;%0Aif%20(startIndex%20%3E=%20usernames.length)%20%7B%0Aalert(%60L'index%20de%20d%C3%A9part%20($%7BstartIndex%7D)%20est%20sup%C3%A9rieur%20au%20nombre%20d'%C3%A9l%C3%A9ments%20($%7Busernames.length%7D).%60);%0Areturn;%0A%7D%0Astate.isRunning%20=%20true;%0Astate.isPaused%20=%20false;%0Astate.shouldStop%20=%20false;%0Astate.usernames%20=%20usernames;%0Astate.stats%20=%20%7B%20success:%200,%20alreadyBlocked:%200,%20failed:%200%20%7D;%0Atextarea.disabled%20=%20true;%0AstartIndexInput.disabled%20=%20true;%0AmainActions.style.display%20=%20'none';%0AcontrolActions.style.display%20=%20'flex';%0AprogressContainer.style.display%20=%20'flex';%0AstatsRow.style.display%20=%20'flex';%0Alog(%60%F0%9F%9A%80%20D%C3%A9marrage%20:%20$%7Busernames.length%20-%20startIndex%7D%20comptes%20%C3%A0%20traiter...%60,%20'info');%0Afor%20(let%20i%20=%20startIndex;%20i%20%3C%20usernames.length;%20i++)%20%7B%0Aif%20(state.shouldStop)%20%7B%0Alog(%60Arr%C3%AAt%C3%A9%20%C3%A0%20l'index%20$%7Bi%7D.%20Vous%20pouvez%20reprendre%20plus%20tard%20%C3%A0%20cet%20index.%60,%20'warn');%0AstartIndexInput.value%20=%20i;%0Abreak;%0A%7D%0Aconst%20user%20=%20usernames%5Bi%5D;%0Aconst%20currentNum%20=%20i%20+%201;%0Aconst%20total%20=%20usernames.length;%0Aconst%20pct%20=%20Math.round((currentNum%20/%20total)%20*%20100);%0AprogressFill.style.width%20=%20%60$%7Bpct%7D%25%60;%0ApercentText.textContent%20=%20%60$%7Bpct%7D%25%60;%0AprogressText.textContent%20=%20%60%5B$%7BcurrentNum%7D/$%7Btotal%7D%5D%20@$%7Buser%7D%60;%0AstatSuccess.textContent%20=%20state.stats.success;%0AstatAlready.textContent%20=%20state.stats.alreadyBlocked;%0AstatFailed.textContent%20=%20state.stats.failed;%0Atry%20%7B%0Aawait%20blockUser(user,%20log);%0A%7D%20catch%20(err)%20%7B%0Aif%20(err.message%20===%20'STOPPED_BY_USER')%20%7B%0Alog(%60Arr%C3%AAt%C3%A9%20pendant%20le%20traitement%20de%20@$%7Buser%7D.%60,%20'warn');%0AstartIndexInput.value%20=%20i;%0Abreak;%0A%7D%0Astate.stats.failed++;%0Alog(%60%E2%9D%8C%20Erreur%20sur%20@$%7Buser%7D:%20$%7Berr.message%7D%60,%20'error');%0AnavigateTo('/home');%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%201000));%0A%7D%0AstatSuccess.textContent%20=%20state.stats.success;%0AstatAlready.textContent%20=%20state.stats.alreadyBlocked;%0AstatFailed.textContent%20=%20state.stats.failed;%0Aif%20(i%20%3C%20usernames.length%20-%201%20&&%20!state.shouldStop)%20%7B%0Aconst%20delay%20=%20randomDelay();%0Alog(%60%E2%8F%B3%20Pause%20de%20s%C3%A9curit%C3%A9%20(~$%7BMath.round(delay%20/%201000)%7Ds)...%60,%20'info');%0Aconst%20startWait%20=%20Date.now();%0Awhile%20(Date.now()%20-%20startWait%20%3C%20delay)%20%7B%0Aif%20(state.shouldStop)%20break;%0Aawait%20checkExecutionControl();%0Aawait%20new%20Promise(r%20=%3E%20setTimeout(r,%20200));%0A%7D%0A%7D%0A%7D%0Astate.isRunning%20=%20false;%0Atextarea.disabled%20=%20false;%0AstartIndexInput.disabled%20=%20false;%0AmainActions.style.display%20=%20'flex';%0AcontrolActions.style.display%20=%20'none';%0Aif%20(!state.shouldStop)%20%7B%0Alog('%F0%9F%8E%89%20Termin%C3%A9%20!%20Tous%20les%20comptes%20ont%20%C3%A9t%C3%A9%20trait%C3%A9s.',%20'success');%0AprogressText.textContent%20=%20'Termin%C3%A9%20avec%20succ%C3%A8s%20!';%0A%7D%20else%20%7B%0AprogressText.textContent%20=%20'Arr%C3%AAt%C3%A9.';%0A%7D%0A%7D);%0AupdateCount();%0A%7D)();" draggable="true" title="Glissez ce bouton vers votre barre de favoris">
+        🛡️ X-Purge
+      </a>
+      <div class="hint">👆 Glissez ce bouton vers votre barre de favoris</div>
+    </div>
+  </div>
+
+  <!-- Étape 2 : Format des listes personnelles -->
+  <div class="section">
+    <h2>2. Préparez votre liste personnelle</h2>
+    <p>X-Purge fonctionne avec vos propres listes de comptes. Vous pouvez coller du texte directement ou importer un fichier <code>.txt</code> respectant ce format simple :</p>
+
+    <div class="sample-box">
+      # Les lignes commençant par # ou vides sont ignorées<br>
+      <span class="active">pseudo1</span><br>
+      <span class="active">@pseudo2</span><br>
+      <span class="active">autre_compte</span>
+    </div>
+
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:0;">
+      ✓ Un compte par ligne<br>
+      ✓ Le caractère <code>@</code> est facultatif (pris en charge automatiquement)<br>
+      ✓ Vous pouvez reprendre l'exécution à tout moment grâce à l'index de départ
+    </p>
+  </div>
+
+  <!-- Étape 3 : Mode d'emploi -->
+  <div class="section">
+    <h2>3. Mode d'emploi</h2>
+    <ol>
+      <li>Connectez-vous sur votre compte sur <a href="https://x.com" target="_blank" style="color:var(--accent);">x.com</a>.</li>
+      <li>Cliquez sur votre favori <strong>🛡️ X-Purge</strong> : le panneau de contrôle s'ouvre directement sur la page.</li>
+      <li>Glissez votre fichier <code>.txt</code> dans la zone prévue (ou collez votre liste de pseudos).</li>
+      <li>Cliquez sur <strong>Démarrer le blocage</strong>. Vous pouvez mettre en pause ou arrêter à tout moment.</li>
+    </ol>
+  </div>
+
+  <!-- Étape 4 : Confidentialité & Sécurité -->
+  <div class="section">
+    <h2>4. Confidentialité & Fonctionnement local</h2>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <strong>🔒 100% Local</strong>
+        Tout s'exécute côté client dans votre propre navigateur. Aucune donnée n'est collectée ni envoyée.
+      </div>
+      <div class="feature-item">
+        <strong>⚡ Zéro extension requise</strong>
+        Fonctionne via un simple bookmarklet JavaScript sans installer d'extension tierce.
+      </div>
+      <div class="feature-item">
+        <strong>📂 Vos propres listes</strong>
+        L'outil est strictement neutre : vous restez seul maître des comptes que vous choisissez de bloquer.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      Code source : <a href="https://github.com/Louloume78/x-purge" target="_blank">Louloume78/x-purge</a>
+    </div>
+    <div>
+      Basé sur <a href="https://github.com/MehdiHadizadeh/x-bulk-blocker" target="_blank">Mehdi Hadizadeh</a> · Licence <a href="https://github.com/Louloume78/x-purge/blob/main/LICENSE" target="_blank">MIT</a>
+    </div>
+  </footer>
+
+</body>
+</html>

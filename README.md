@@ -1,93 +1,63 @@
-# x-bulk-blocker
+# 🛡️ X-Purge
 
-**Safe & simple bulk-block tool for X (Twitter)**  
-A tiny browser-console script that lets you block hundreds of accounts by username — without extensions, without API keys, and without risking your account.
+Outil de blocage et de nettoyage en masse pour X (Twitter) — sans extension, sans clé API, avec interface visuelle intégrée directement sur la page.
 
-Works perfectly in 2025 on the current X.com single-page app.
+Fonctionne sur la version web actuelle de [x.com](https://x.com).
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-
-## Features
-
-- 100 % DOM-based → X sees it exactly like manual clicking  
-- Fully SPA-aware (no script crashes when navigating)  
-- Resumable (if interrupted, just restart from any index)  
-- Random human-like delays (2–5 seconds by default)  
-- No installation — just copy-paste into the browser console  
-
-## How to Use (30 seconds)
-
-1. Go to https://x.com/home and make sure you’re logged in  
-2. Open Developer Console  
-   → Press `F12` or `Ctrl+Shift+I` (Windows) / `Cmd+Option+I` (Mac) → click the **Console** tab  
-3. Copy the entire script from [`bulk-block.js`](bulk-block.js)  
-4. Paste it into the console and press **Enter**  
-5. When prompted:  
-   - Paste your usernames (one per line, **no @ needed**)  
-   - Click OK  
-   - Choose starting index (usually `0`) → OK  
-6. Sit back. The script will block one account at a time and show progress.
-
-Done → Check your blocked list: https://x.com/settings/blocked
-
-## Safety & Recommended Limits (2025)
-
-| Daily volume       | Risk with this script | Risk with Red Block | Recommendation                                  |
-|-----------------|-----------------------|---------------------|------------------------------------------------|
-| ≤ 200 accounts  | Extremely low         | Zero                | One session is fine with either tool           |
-| 200–500 accounts| Very low              | Zero                | Script is still safe; Red Block is faster      |
-| 500–1000 accounts| Low–Moderate         | Extremely low       | Prefer Red Block or split script into 2–3 days |
-| > 1000 accounts | Moderate–High         | Very low            | Use Red Block or similar extension              |
-
-With the default 2–5 second random delay you stay **well below** X’s rate limits.  
-Thousands of users run similar scripts weekly with no bans or locks.
-
-**Why use this script when Red Block exists?**  
-→ Because Red Block is the gold standard for large-scale blocking (1000+),  
-but this script is the perfect lightweight, no-install, always-works alternative for
-
-  • when extensions are blocked  
-  • when Red Block is temporarily broken after an X update  
-  • when you only need to block a few hundred accounts  
-  • or when you just love having full control over the code.
-
-## Tips
-
-- Test first with 3–5 usernames  
-- If you ever see “Something went wrong” → just wait 10–15 minutes and continue  
-- Older or Premium accounts have higher limits and almost never get temporary locks  
-- Want zero screen flashing? Use the excellent Chrome/Firefox extension **Red Block** instead
-
-
-## Files
-
-- `bulk-block.js` → the script (copy-paste ready)  
-- `example-usernames.txt` → sample format
-
-## Troubleshooting
-
-| Problem                        | Fix                                                    |
-|--------------------------------|--------------------------------------------------------|
-| Script stops mid-way           | Re-run and enter the last successful index when asked  |
-| “Element not found”            | User doesn’t exist or is suspended → automatically skipped |
-| Too fast / temporary lock      | Increase `DELAY_MIN` and `DELAY_MAX` to 4000–8000 ms   |
-
-## Legal / Ethical Note
-
-Use only to block spam, bots, harassers, or accounts you don’t want to see.  
-Mass-blocking for coordinated harassment violates X’s rules.
-
-## Contributing
-
-Pull requests are welcome! Especially:
-- Better selectors for future X UI changes  
-- Optional file-upload (drag-and-drop usernames)  
-- Tampermonkey version
-
-## License
-
-MIT © 2025 – feel free to fork, share, and improve.
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Page%20d'installation-1d9bf0?style=flat&logo=github)](https://louloume78.github.io/x-purge/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
-Made because cleaning your timeline shouldn’t be painful.
+## 🌐 Page d'installation
+
+👉 **Accédez à la page d'installation en ligne : [louloume78.github.io/x-purge](https://louloume78.github.io/x-purge/)**
+
+Sur cette page simple et directe :
+- 🖱️ **Glisser-déposer du favori** « 🛡️ X-Purge » dans votre barre de favoris.
+- 📋 **Instructions & format** pour préparer votre propre fichier de comptes personnel.
+
+---
+
+## 🚀 Utilisation rapide
+
+1. Glissez le bouton **🛡️ X-Purge** depuis la page [GitHub Pages](https://louloume78.github.io/x-purge/) ou [`index.html`](index.html) dans votre barre de favoris (`Ctrl + Maj + B` ou `Cmd + Maj + B`).
+2. Rendez-vous sur [x.com](https://x.com) en étant connecté.
+3. Cliquez sur le favori **🛡️ X-Purge** : le panneau s'ouvre directement en bas à droite de votre écran.
+4. Glissez votre fichier `.txt` personnel de comptes dans la boîte (ou collez les pseudos un par ligne).
+5. Cliquez sur **Démarrer le blocage**.
+
+---
+
+## 🔒 Confidentialité & Légalité
+
+- **100% Côté Client :** Aucune requête n'est transmise à des serveurs tiers. Tout le traitement se déroule localement dans votre navigateur.
+- **Aucune liste fournie :** L'outil est strictement neutre. Vous êtes le seul maître des comptes que vous souhaitez bloquer ou masquer sur votre propre flux.
+- **Sans extension :** Ne nécessite aucune permission spéciale d'extension de navigateur.
+
+---
+
+## 📁 Fichiers du projet
+
+| Fichier | Utilité |
+| :--- | :--- |
+| [`index.html`](index.html) | Page GitHub Pages (Installation du Bookmarklet + guide d'utilisation) |
+| [`bulk-block.js`](bulk-block.js) | Code source JavaScript avec interface Shadow DOM |
+| [`bookmarklet.txt`](bookmarklet.txt) | Code JavaScript prêt pour le bookmarklet (URL encodée) |
+| [`build-bookmarklet.js`](build-bookmarklet.js) | Script de compilation (`node build-bookmarklet.js`) |
+| [`LICENSE`](LICENSE) | Licence MIT |
+| [`README.md`](README.md) | Documentation |
+
+---
+
+## 👏 Crédits
+
+Basé sur le travail original de :
+- **Auteur original** : [Mehdi Hadizadeh (Mehdyo)](https://github.com/MehdiHadizadeh)
+- **Dépôt d'origine** : [MehdiHadizadeh/x-bulk-blocker](https://github.com/MehdiHadizadeh/x-bulk-blocker)
+
+---
+
+## 📄 Licence
+
+Distribué sous licence **MIT** (voir [`LICENSE`](LICENSE)).
