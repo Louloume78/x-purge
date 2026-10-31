@@ -109,11 +109,11 @@
       }
     }
 
-    // 3. Check for empty state banner "You blocked @..." / "Vous avez bloqué @..."
+    // 3. Check for empty state banner explicitly stating "You blocked @..." / "Vous avez bloqué @..."
     const emptyState = document.querySelector('[data-testid="emptyState"]');
     if (emptyState) {
       const text = (emptyState.textContent || '').toLowerCase();
-      if (text.includes('bloqu') || text.includes('block') || text.includes('sperr')) {
+      if (text.includes('vous avez bloqué') || text.includes('you blocked') || text.includes('has bloqueado') || (text.includes('blockiert') && text.includes('du hast'))) {
         return true;
       }
     }
@@ -239,10 +239,13 @@
     if (!confirmBtn) throw new Error('Bouton de confirmation introuvable');
 
     // CRITICAL SAFETY NET: Check if confirmation modal is actually asking to UNBLOCK
-    const modalText = (confirmModal ? confirmModal.textContent : '').toLowerCase();
-    const confirmBtnText = (confirmBtn.textContent || '').toLowerCase();
+    const confirmBtnText = (confirmBtn.textContent || '').trim().toLowerCase();
+    const modalTitleEl = confirmModal ? confirmModal.querySelector('h1, [role="heading"], [data-testid="sheetTitle"]') : null;
+    const modalTitleText = (modalTitleEl ? modalTitleEl.textContent : '').trim().toLowerCase();
 
-    if (isUnblockText(confirmBtnText) || isUnblockText(modalText)) {
+    // Check ONLY the confirm button itself and the modal title.
+    // Do NOT check the full modal description, because Twitter's block modal mentions "Vous pouvez le débloquer à tout moment" / "You can unblock...".
+    if (isUnblockText(confirmBtnText) || isUnblockText(modalTitleText)) {
       // Abort! Do NOT confirm unblock!
       const cancelBtn = document.querySelector('[data-testid="confirmationSheetCancel"]') ||
                         Array.from(document.querySelectorAll('[role="dialog"] button')).find(b => {
@@ -252,7 +255,7 @@
       if (cancelBtn) cancelBtn.click();
       else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
-      log(`ℹ️ @${username} est déjà bloqué (sécurité confirmation déclenchée).`, 'info');
+      log(`ℹ️ @${username} est déjà bloqué.`, 'info');
       state.stats.alreadyBlocked++;
       navigateTo('/home');
       await new Promise(r => setTimeout(r, 800));
