@@ -78,49 +78,113 @@
     }
   }
 
+  // Helper: Regex detectors for block / unblock multilingual strings
+  const UNBLOCK_REGEX = /unblock|d[ée]bloqu|desbloqu|entblock|sblocc/i;
+  const BLOCK_REGEX = /block|bloqu|sperr/i;
+
+  function isUnblockText(str) {
+    return UNBLOCK_REGEX.test(str || '');
+  }
+
+  function isBlockText(str) {
+    const text = str || '';
+    return BLOCK_REGEX.test(text) && !UNBLOCK_REGEX.test(text);
+  }
+
+  // Helper: Check if account is already blocked directly from profile view
+  function checkProfileAlreadyBlocked() {
+    // 1. Check for unblock buttons on profile header (e.g. data-testid="${userId}-unblock" or "unblock")
+    const unblockBtn = document.querySelector('[data-testid$="-unblock"], [data-testid="unblock"]');
+    if (unblockBtn) return true;
+
+    // 2. Profile header buttons with "Blocked" / "Bloqué"
+    const headerBtns = Array.from(document.querySelectorAll('[data-testid="primaryColumn"] button, [data-testid="UserProfileHeader_Items"] button'));
+    for (const btn of headerBtns) {
+      const text = (btn.textContent || '').trim().toLowerCase();
+      const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
+      if (text === 'bloqué' || text === 'blocked' || text === 'bloqueado' || text === 'blockiert' ||
+          isUnblockText(text) || isUnblockText(aria) ||
+          aria.includes('bloqué') || aria.includes('blocked') || aria.includes('bloqueado')) {
+        return true;
+      }
+    }
+
+    // 3. Check for empty state banner "You blocked @..." / "Vous avez bloqué @..."
+    const emptyState = document.querySelector('[data-testid="emptyState"]');
+    if (emptyState) {
+      const text = (emptyState.textContent || '').toLowerCase();
+      if (text.includes('bloqu') || text.includes('block') || text.includes('sperr')) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   // Core Blocking Routine
   async function blockUser(username, log) {
     navigateTo(`/${username}`);
     await checkExecutionControl();
 
-    await waitForElement('[data-testid="userActions"]', CONFIG.loadWait);
+    // Wait for the profile actions or blocked state to appear
+    await waitForElement('[data-testid="userActions"], [data-testid$="-unblock"], [data-testid="emptyState"]', CONFIG.loadWait);
     await checkExecutionControl();
 
+    // 1. Check if the user is already blocked directly from the profile page
+    if (checkProfileAlreadyBlocked()) {
+      log(`ℹ️ @${username} est déjà bloqué.`, 'info');
+      state.stats.alreadyBlocked++;
+      navigateTo('/home');
+      await new Promise(r => setTimeout(r, 800));
+      return 'ALREADY_BLOCKED';
+    }
+
     const menuBtn = document.querySelector('[data-testid="userActions"]');
-    if (!menuBtn) throw new Error('Bouton d\'actions utilisateur introuvable');
+    if (!menuBtn) {
+      if (checkProfileAlreadyBlocked()) {
+        log(`ℹ️ @${username} est déjà bloqué.`, 'info');
+        state.stats.alreadyBlocked++;
+        navigateTo('/home');
+        await new Promise(r => setTimeout(r, 800));
+        return 'ALREADY_BLOCKED';
+      }
+      throw new Error('Bouton d\'actions utilisateur introuvable');
+    }
+
     menuBtn.click();
+    await new Promise(r => setTimeout(r, 300));
 
     let blockBtn = null;
     let isAlreadyBlocked = false;
     const menuStart = Date.now();
 
     while (Date.now() - menuStart < 3500) {
-      blockBtn = document.querySelector('[data-testid="block"]');
-      if (blockBtn) break;
-
-      const unblockBtn = document.querySelector('[data-testid="unblock"]');
-      if (unblockBtn) {
+      // 1. Check if unblock button exists in menu or page
+      const unblockEl = document.querySelector('[role="menu"] [data-testid$="unblock"], [role="menu"] [data-testid="unblock"], [data-testid$="-unblock"]');
+      if (unblockEl) {
         isAlreadyBlocked = true;
         break;
       }
 
-      // Multilingual search on menu items
-      const items = Array.from(document.querySelectorAll('[role="menuitem"]'));
+      // 2. Multilingual search on menu items
+      const items = Array.from(document.querySelectorAll('[role="menu"] [role="menuitem"], [role="menuitem"]'));
       if (items.length > 0) {
+        // ALWAYS check for unblock FIRST
         const unblockItem = items.find(item => {
           const text = item.textContent.trim().toLowerCase();
-          return text.includes('unblock') || text.includes('débloquer') || text.includes('desbloquear') || text.includes('entblocken') || text.includes('sblocca');
+          const testId = (item.getAttribute('data-testid') || '').toLowerCase();
+          return isUnblockText(text) || testId.includes('unblock');
         });
         if (unblockItem) {
           isAlreadyBlocked = true;
           break;
         }
 
+        // Only select block button if it does NOT match unblock
         const found = items.find(item => {
           const text = item.textContent.trim().toLowerCase();
-          const matches = text.includes('block') || text.includes('bloqu') || text.includes('sperren');
-          const isUn = text.includes('unblock') || text.includes('débloquer') || text.includes('desbloquear');
-          return matches && !isUn;
+          const testId = (item.getAttribute('data-testid') || '').toLowerCase();
+          return (isBlockText(text) || testId === 'block') && !isUnblockText(text) && !testId.includes('unblock');
         });
         if (found) {
           blockBtn = found;
@@ -131,6 +195,7 @@
     }
 
     if (isAlreadyBlocked) {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       document.body.click(); // Close dropdown
       log(`ℹ️ @${username} est déjà bloqué.`, 'info');
       state.stats.alreadyBlocked++;
@@ -139,7 +204,18 @@
       return 'ALREADY_BLOCKED';
     }
 
-    if (!blockBtn) throw new Error('Bouton "Bloquer" introuvable dans le menu');
+    if (!blockBtn) {
+      if (checkProfileAlreadyBlocked()) {
+        document.body.click();
+        log(`ℹ️ @${username} est déjà bloqué.`, 'info');
+        state.stats.alreadyBlocked++;
+        navigateTo('/home');
+        await new Promise(r => setTimeout(r, 800));
+        return 'ALREADY_BLOCKED';
+      }
+      document.body.click();
+      throw new Error('Bouton "Bloquer" introuvable dans le menu');
+    }
 
     blockBtn.click();
     await new Promise(r => setTimeout(r, CONFIG.clickWait));
@@ -147,17 +223,41 @@
 
     // Confirm Block Modal
     let confirmBtn = null;
+    let confirmModal = null;
     try {
       confirmBtn = await waitForElement('[data-testid="confirmationSheetConfirm"]', 4000);
+      confirmModal = document.querySelector('[role="dialog"]') || confirmBtn.closest('[data-testid="sheetDialog"]') || document.body;
     } catch {
       confirmBtn = document.querySelector('[role="dialog"] button[data-testid*="Confirm"]') ||
                    Array.from(document.querySelectorAll('[role="dialog"] button')).find(b => {
                      const t = b.textContent.toLowerCase();
-                     return t.includes('block') || t.includes('bloquer') || t.includes('confirm');
+                     return isBlockText(t) || t.includes('confirm');
                    });
+      confirmModal = document.querySelector('[role="dialog"]') || document.body;
     }
 
     if (!confirmBtn) throw new Error('Bouton de confirmation introuvable');
+
+    // CRITICAL SAFETY NET: Check if confirmation modal is actually asking to UNBLOCK
+    const modalText = (confirmModal ? confirmModal.textContent : '').toLowerCase();
+    const confirmBtnText = (confirmBtn.textContent || '').toLowerCase();
+
+    if (isUnblockText(confirmBtnText) || isUnblockText(modalText)) {
+      // Abort! Do NOT confirm unblock!
+      const cancelBtn = document.querySelector('[data-testid="confirmationSheetCancel"]') ||
+                        Array.from(document.querySelectorAll('[role="dialog"] button')).find(b => {
+                          const t = b.textContent.toLowerCase();
+                          return t.includes('annuler') || t.includes('cancel');
+                        });
+      if (cancelBtn) cancelBtn.click();
+      else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      log(`ℹ️ @${username} est déjà bloqué (sécurité confirmation déclenchée).`, 'info');
+      state.stats.alreadyBlocked++;
+      navigateTo('/home');
+      await new Promise(r => setTimeout(r, 800));
+      return 'ALREADY_BLOCKED';
+    }
 
     confirmBtn.click();
     await new Promise(r => setTimeout(r, 1200));
